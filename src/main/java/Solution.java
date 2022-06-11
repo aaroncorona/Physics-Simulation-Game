@@ -44,7 +44,6 @@ public class Solution {
     private void locationClicked(int row, int col, int tool) {
         // Update the grid for every click event
         grid[row][col] = tool;
-//        System.out.println(grid[row][col]);
     }
 
     /** Copies each element of grid into the display. */
@@ -63,8 +62,6 @@ public class Solution {
                 }
             }
         }
-//        printGrid();
-//        System.out.println("BREAK");
     }
 
     /** Called repeatedly. Causes one random particle to maybe do something. */
@@ -77,9 +74,6 @@ public class Solution {
         Point randomPoint = random.getRandomPoint();
         int randomRow = randomPoint.row;
         int randomCol = randomPoint.column;
-//        System.out.println("randomRow" +  randomRow);
-//        System.out.println("randomCol" + randomCol);
-//        System.out.println("randomDir" + randomDir);
         int maxCol = display.getNumColumns() - 1;
         int maxRow = display.getNumRows() - 1;
         // Sand down movement: If the particle is sand and below is empty, move it down 1
@@ -102,36 +96,25 @@ public class Solution {
         else if (grid[randomRow][randomCol] == 3) {
             // Get random direction (for water)
             int randomDir = random.getRandomDirection();
-//            System.out.println("randomRow " + randomRow);
-//            System.out.println("randomCol " + randomCol);
-//            System.out.println("randomDir " + randomDir);
-//            printGrid();
             // First, out of bounds check in all 3 directions
             if((randomRow == maxRow && randomDir == 0)
                || (randomCol == maxCol && randomDir == 1)
-               || (randomCol == 0 && randomDir == 2))
-            {
-//                System.out.println("BOUNDARY HIT");
-            }
+               || (randomCol == 0 && randomDir == 2)) {}
             // Move in the random dir if that space is open
             else if (randomDir == 0
                      && grid[randomRow + 1][randomCol] == 0) {
-//                System.out.println("MOVE DOWN");
                 grid[randomRow][randomCol] = 0;
                 grid[randomRow + 1][randomCol] = 3;
             } else if (randomDir == 1
                        && grid[randomRow][randomCol + 1] == 0) {
-//                System.out.println("MOVE RIGHT");
                 grid[randomRow][randomCol] = 0;
                 grid[randomRow][randomCol + 1] = 3;
             } else if (randomDir == 2
                     && grid[randomRow][randomCol - 1] == 0) {
-//                System.out.println("MOVE LEFT");
                 grid[randomRow][randomCol] = 0;
                 grid[randomRow][randomCol - 1] = 3;
             }
         }
-//        System.out.println("BREAK");
     }
 
     /********************************************************************/

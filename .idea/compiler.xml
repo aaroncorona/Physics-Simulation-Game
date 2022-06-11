@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="sand" />
+        <module name="Physics-Simulation" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="sand" target="1.8" />
+      <module name="Physics-Simulation" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
