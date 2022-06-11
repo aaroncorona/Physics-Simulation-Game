@@ -8,7 +8,6 @@ public class Solution {
     public static final int METAL = 1;
     public static final int SAND = 2;
     public static final int WATER = 3;
-
     public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water"};
 
     // Do not add any more fields as part of Lab 5.
