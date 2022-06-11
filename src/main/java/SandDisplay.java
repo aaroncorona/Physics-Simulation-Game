@@ -168,7 +168,7 @@ public class SandDisplay extends JComponent implements MouseListener,
         int numCols = 80;
         Solution lab =
                 new Solution(
-                        new SandDisplay("Falling Sand", numRows, numCols, Solution.NAMES),
+                        new SandDisplay("Physics Simulation", numRows, numCols, Solution.NAMES),
                         new Solution.RandomGenerator(numRows, numCols));
         lab.run();
     }
