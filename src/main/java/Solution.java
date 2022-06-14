@@ -8,7 +8,7 @@ public class Solution {
     public static final int METAL = 1;
     public static final int SAND = 2;
     public static final int WATER = 3;
-    public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water"};
+    public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water", "Lava"};
 
     // Do not add any more fields as part of Lab 5.
     private int[][] grid;
@@ -51,14 +51,18 @@ public class Solution {
         for (int i = 0; i < grid.length; i++) {
             for (int a = 0; a < grid[i].length; a++) {
                 if(grid[i][a] == 0){
-                    display.setColor(i, a, Color.BLACK);
+                    display.setColor(i, a, Color.BLACK); // Empty
                 } else if(grid[i][a] == 1){
-                    display.setColor(i, a, Color.GRAY);
+                    display.setColor(i, a, Color.GRAY); // Metal
                 } else if(grid[i][a] == 2){
-                    display.setColor(i, a, Color.YELLOW);
+                    display.setColor(i, a, Color.YELLOW); // Sand
                 } else if(grid[i][a] == 3){
-                    display.setColor(i, a, Color.BLUE);
-                }
+                    display.setColor(i, a, Color.BLUE); // Water
+                } else if(grid[i][a] == 4){
+                    display.setColor(i, a, Color.RED); // Lava
+                } else if(grid[i][a] == 5){
+                    display.setColor(i, a, new Color(255, 182,97)); // Color for being on fire from lava, not an actual button
+              }
             }
         }
     }
@@ -91,6 +95,25 @@ public class Solution {
             grid[randomRow][randomCol] = 3;
             grid[randomRow + 1][randomCol] = 2;
         }
+        // Sand or Water movement through Lava: Ignite
+        else if ((grid[randomRow][randomCol] == 2
+                || grid[randomRow][randomCol] == 3)
+                && randomRow < maxRow
+                && grid[randomRow + 1][randomCol] == 4) {
+            // Evaporate particle
+            grid[randomRow][randomCol] = 0;
+            // Next, Ignite surrounding area
+            // Out of bounds check
+            if(randomCol == maxCol
+                    || randomCol == 0) {}
+            // Lava check before igniting surrounding area (only ignite metal, sand, and water)
+            else if(grid[randomRow][randomCol+1] < 4){
+                grid[randomRow][randomCol+1] = 5;// Turn to fire
+            }
+            else if(grid[randomRow][randomCol-1] < 4){
+                grid[randomRow][randomCol-1] = 5;// Turn to fire
+            }
+        }
         // If the particle is water, move in a random direction that is free
         else if (grid[randomRow][randomCol] == 3) {
             // Get random direction (for water)
@@ -114,6 +137,62 @@ public class Solution {
                 grid[randomRow][randomCol - 1] = 3;
             }
         }
+        // Lava down movement through empty space: Move down
+        else if (grid[randomRow][randomCol] == 4
+                && randomRow < maxRow // out of bounds check
+                && grid[randomRow + 1][randomCol] == 0) {
+            // Update grid
+            grid[randomRow][randomCol] = 0;
+            grid[randomRow + 1][randomCol] = 4;// Turn to lava
+        }
+        // Lava movement through other particle: Move down and ignite surrounding area
+        else if (grid[randomRow][randomCol] == 4
+                && randomRow < maxRow  // Out of bounds check
+                && grid[randomRow + 1][randomCol] > 0 // any particle besides another lava or fire
+                && grid[randomRow + 1][randomCol] < 4) {
+            // Move lava down 1
+            grid[randomRow][randomCol] = 0;
+            grid[randomRow + 1][randomCol] = 4;// Turn to lava
+            // Next, ignite surrounding area (add fire)
+            // First, out of bounds check right and left before igniting
+            if(randomCol == maxCol
+               || randomCol == 0) {}
+            // Lava check before igniting surrounding area (only ignite metal, sand, and water)
+            else if(grid[randomRow][randomCol+1] < 4){
+                grid[randomRow][randomCol+1] = 5;// Turn to fire
+            }
+            else if(grid[randomRow][randomCol-1] < 4){
+                grid[randomRow][randomCol-1] = 5;// Turn to fire
+            }
+        }
+        // Fire random movement: If the particle is fire, move in a random direction that is free, or be extinguished randomly
+        else if (grid[randomRow][randomCol] == 5) {
+            // Get random direction (dont use same Random as water in order to use different seed)
+            int randomDir = new Random().nextInt(3);
+            // 0 puts out fire (happens 1/3 rolls)
+            if (randomDir == 0) {
+                grid[randomRow][randomCol] = 0;
+            }
+            // Do not float
+            else if (grid[randomRow+1][randomCol] == 0) {
+                grid[randomRow][randomCol] = 0;
+            }
+            // First, out of bounds check right and left
+            else if(randomCol == maxCol
+                    || randomCol == 0) {}
+            // Lava check before igniting surrounding area (only ignite metal, sand, and water)
+            else if (grid[randomRow][randomCol + 1] < 4) { // flame ignites everything except lava
+                grid[randomRow][randomCol + 1] = 5;
+            }
+            else if (grid[randomRow][randomCol - 1] < 4) { // flame ignites everything except lava
+                grid[randomRow][randomCol - 1] = 5;
+            }
+        }
+        // AIs
+        // Add condition so that lava does not stack up vertically (no more than 2 high?)
+        // Add condition so that sand does not stack up vertically (no more than 2 high?)
+        // Add condition so that water can permeate sand?
+        // Add sand or metal color variation
     }
 
     /********************************************************************/
