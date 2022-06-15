@@ -9,7 +9,8 @@ public class Solution {
     public static final int SAND = 2;
     public static final int WATER = 3;
     public static final int LAVA = 4;
-    public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water", "Lava"};
+    public static final int FIRE = 5;
+    public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water", "Lava", "Fire"};
 
     // Do not add any more fields as part of Lab 5.
     private int[][] grid;
@@ -62,7 +63,7 @@ public class Solution {
                 } else if(grid[i][a] == 4){
                     display.setColor(i, a, Color.RED); // Lava
                 } else if(grid[i][a] == 5){
-                    display.setColor(i, a, new Color(255, 182,97)); // Color for being on fire from lava, not an actual button
+                    display.setColor(i, a, new Color(255, 182,97)); // Fire
               }
             }
         }
@@ -93,6 +94,12 @@ public class Solution {
             // Next, Ignite particle above
             grid[randomRow-1][randomCol] = 5;
         }
+        // Bottom Row - Fire extinguished (edge case)
+        else if (grid[randomRow][randomCol] == 5
+                && randomRow == maxRow){
+            // Erase particle
+            grid[randomRow][randomCol] = 0;
+        }
         // Bottom Row - Out of bounds check (freeze particles at the very bottom)
         else if(randomRow == maxRow){}
         // Sand or Water or Metal next to Lava: Ignite
@@ -113,6 +120,17 @@ public class Solution {
             else if(grid[randomRow][randomCol-1] < 4){
                 grid[randomRow][randomCol-1] = 5;// Turn to fire
             }
+        }
+        // Fire extinguished by water
+        else if (grid[randomRow][randomCol] == 5
+                 && randomCol < maxCol // oob check
+                 && randomCol > 0 // oob check
+                 && (grid[randomRow + 1][randomCol] == 3 // next to water
+                     || grid[randomRow][randomCol + 1] == 3
+                     || grid[randomRow][randomCol - 1] == 3)){
+
+            // Erase particle
+            grid[randomRow][randomCol] = 0;
         }
         // Sand down movement: If the particle is sand and below is empty, move it down 1
         else if (grid[randomRow][randomCol] == 2
@@ -448,6 +466,7 @@ public class Solution {
 
 // Note: Project 6 features added
 // 1) Added new particle: Lava. It's red, falls, and burns through other particles
-// 2) Added new modeling feature: Fire created when Lava contacts other particles
-// 3) Added new modeling feature: Sand and Lava fall down rather than stacking up like a vertical column
-// 4) TBD
+// 2) Added new particle: Fire. It's orange and moves randomly very briefly until burning out
+// 3) Added new modeling feature: Fire is ignited when Lava contacts other particles
+// 4) Added new modeling feature: Sand and Lava fall down rather than stacking up like a vertical column
+// 5) TBD
