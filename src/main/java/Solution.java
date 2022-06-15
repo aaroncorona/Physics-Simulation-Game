@@ -8,6 +8,7 @@ public class Solution {
     public static final int METAL = 1;
     public static final int SAND = 2;
     public static final int WATER = 3;
+    public static final int LAVA = 4;
     public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water", "Lava"};
 
     // Do not add any more fields as part of Lab 5.
@@ -444,3 +445,9 @@ public class Solution {
         lab.printGrid();
     }
 }
+
+// Note: Project 6 features added
+// 1) Added new particle: Lava. It's red, falls, and burns through other particles
+// 2) Added new modeling feature: Fire created when Lava contacts other particles
+// 3) Added new modeling feature: Sand and Lava fall down rather than stacking up like a vertical column
+// 4) TBD
