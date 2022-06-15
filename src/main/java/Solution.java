@@ -8,9 +8,10 @@ public class Solution {
     public static final int METAL = 1;
     public static final int SAND = 2;
     public static final int WATER = 3;
-    public static final int LAVA = 4;
-    public static final int FIRE = 5;
-    public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water", "Lava", "Fire"};
+    public static final int CLOUD = 4;
+    public static final int LAVA = 5;
+    public static final int FIRE = 6;
+    public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water", "Cloud", "Lava", "Fire"};
 
     // Do not add any more fields as part of Lab 5.
     private int[][] grid;
@@ -61,10 +62,12 @@ public class Solution {
                 } else if(grid[i][a] == 3){
                     display.setColor(i, a, Color.BLUE); // Water
                 } else if(grid[i][a] == 4){
-                    display.setColor(i, a, Color.RED); // Lava
+                    display.setColor(i, a, Color.WHITE); // Cloud
                 } else if(grid[i][a] == 5){
-                    display.setColor(i, a, new Color(255, 182,97)); // Fire
-              }
+                    display.setColor(i, a, Color.RED); // Lava
+               }  else if(grid[i][a] == 6){
+                display.setColor(i, a, Color.ORANGE); // Fire
+            }
             }
         }
     }
@@ -72,7 +75,6 @@ public class Solution {
     /** Called repeatedly. Causes one random particle to maybe do something. */
     // A single invocation of step should just attempt to move one particle in one square
     public void step() {
-        // TODO: Populate this method in step 6 and beyond.
         // Get random point on the grid
         int totalRows = display.getNumRows();
         int totalCol = display.getNumColumns();
@@ -84,69 +86,80 @@ public class Solution {
         // Bottom Row - Sand or Water or Metal next to Lava: Ignite
         if(randomRow == maxRow
            && grid[randomRow][randomCol] > 0 // Sand or Water or Metal
-           && grid[randomRow][randomCol] < 4
+           && grid[randomRow][randomCol] < 5
            && randomCol < maxCol // oob check
            && randomCol > 0 // oob check
-           && (grid[randomRow][randomCol + 1] == 4 // next to lava
-               || grid[randomRow][randomCol - 1] == 4)) {
+           && (grid[randomRow][randomCol + 1] == 5 // next to lava
+               || grid[randomRow][randomCol - 1] == 5)) {
             // Evaporate particle
             grid[randomRow][randomCol] = 0;
             // Next, Ignite particle above
-            grid[randomRow-1][randomCol] = 5;
+            grid[randomRow-1][randomCol] = 6;
         }
         // Bottom Row - Fire extinguished (edge case)
-        else if (grid[randomRow][randomCol] == 5
+        else if (grid[randomRow][randomCol] == 6
                 && randomRow == maxRow){
             // Erase particle
             grid[randomRow][randomCol] = 0;
         }
         // Bottom Row - Out of bounds check (freeze particles at the very bottom)
         else if(randomRow == maxRow){}
-        // Sand or Water or Metal next to Lava: Ignite
+        // Any particle next to Lava: Ignite
         else if (grid[randomRow][randomCol] > 0 // Sand or Water or Metal
-                && grid[randomRow][randomCol] < 4
+                && grid[randomRow][randomCol] < 5
                 && randomCol < maxCol // oob check
                 && randomCol > 0 // oob check
-                && (grid[randomRow + 1][randomCol] == 4 // next to lava
-                    || grid[randomRow][randomCol + 1] == 4
-                    || grid[randomRow][randomCol - 1] == 4)){
+                && (grid[randomRow + 1][randomCol] == 5 // next to lava
+                    || grid[randomRow][randomCol + 1] == 5
+                    || grid[randomRow][randomCol - 1] == 5)){
             // Evaporate particle
             grid[randomRow][randomCol] = 0;
             // Next, Ignite surrounding area
             // Lava check before igniting surrounding area (only ignite metal, sand, and water)
-            if(grid[randomRow][randomCol+1] < 4){
-                grid[randomRow][randomCol+1] = 5;// Turn to fire
+            if(grid[randomRow][randomCol+1] < 5){
+                grid[randomRow][randomCol+1] = 6;// Turn to fire
             }
-            else if(grid[randomRow][randomCol-1] < 4){
-                grid[randomRow][randomCol-1] = 5;// Turn to fire
+            else if(grid[randomRow][randomCol-1] < 5){
+                grid[randomRow][randomCol-1] = 6;// Turn to fire
             }
-        }
-        // Fire extinguished by water
-        else if (grid[randomRow][randomCol] == 5
-                 && randomCol < maxCol // oob check
-                 && randomCol > 0 // oob check
-                 && (grid[randomRow + 1][randomCol] == 3 // next to water
-                     || grid[randomRow][randomCol + 1] == 3
-                     || grid[randomRow][randomCol - 1] == 3)){
-
-            // Erase particle
-            grid[randomRow][randomCol] = 0;
         }
         // Sand down movement: If the particle is sand and below is empty, move it down 1
         else if (grid[randomRow][randomCol] == 2
                 && grid[randomRow + 1][randomCol] == 0) {
-            // Update grid
+            // Move down
             grid[randomRow][randomCol] = 0;
             grid[randomRow + 1][randomCol] = 2;
         }
         // Sand down movement in water: If the particle is sand and water is below, swap positions (so sand will sink)
         else if (grid[randomRow][randomCol] == 2
                 && grid[randomRow + 1][randomCol] == 3) {
-            // Update grid
+            // Move down and move water up
             grid[randomRow][randomCol] = 3;
             grid[randomRow + 1][randomCol] = 2;
         }
-        // If the particle is water, move in a random direction that is free
+        // Sand anti-stacking: Fall to the side (through an empty or water) instead of making a single vertical column
+        else if (grid[randomRow][randomCol] == 2 // Sand with sand the next 2 below (prevent stack)
+                && grid[randomRow + 1][randomCol] == 2){
+            // Get random direction (dont use same Random as water in order to use different seed)
+            int randomDir = new Random().nextInt(3);
+            // Move right and down if empty or water
+            if (randomCol < maxCol // oob check
+                    && randomDir == 1
+                    && (grid[randomRow + 1][randomCol + 1] == 0
+                    || grid[randomRow + 1][randomCol + 1] == 3)) {
+                grid[randomRow][randomCol] = 0;
+                grid[randomRow + 1][randomCol + 1] = 2;
+            }
+            // Move left and down if empty or water
+            else if (randomCol > 0 // oob check
+                    && randomDir == 2
+                    && (grid[randomRow + 1][randomCol - 1] == 0
+                    || grid[randomRow + 1][randomCol - 1] == 3)) {
+                grid[randomRow][randomCol] = 0;
+                grid[randomRow + 1][randomCol - 1] = 2;
+            }
+        }
+        // Water random movement
         else if (grid[randomRow][randomCol] == 3) {
             // Get random direction (for water)
             int randomDir = random.getRandomDirection();
@@ -169,34 +182,51 @@ public class Solution {
                 grid[randomRow][randomCol - 1] = 3;
             }
         }
-        // Lava down movement through empty space: Move down
-        else if (grid[randomRow][randomCol] == 4
-                && grid[randomRow + 1][randomCol] == 0) {
-            // Update grid
+        // Cloud disappears off screen
+        else if (randomCol == maxCol // oob check
+                && grid[randomRow][randomCol] == 4){
+            // Disappear
             grid[randomRow][randomCol] = 0;
-            grid[randomRow + 1][randomCol] = 4;// Turn to lava
+        }
+        // Cloud floats right into empty space very slowly (light breeze)
+        else if (grid[randomRow][randomCol] == 4
+                 && grid[randomRow][randomCol+1] == 0) {
+            // Get random num
+            int randomNum = new Random().nextInt(100);
+            // Move right 1/100 times
+            if(randomNum == 1){
+                grid[randomRow][randomCol] = 0;
+                grid[randomRow][randomCol+1] = 4;
+            }
+        }
+        // Lava down movement through empty space: Move down
+        else if (grid[randomRow][randomCol] == 5
+                && grid[randomRow + 1][randomCol] == 0) {
+            // Move down
+            grid[randomRow][randomCol] = 0;
+            grid[randomRow + 1][randomCol] = 5;// Turn to lava
         }
         // Lava movement through other particle: Move down and ignite surrounding area
-        else if (grid[randomRow][randomCol] == 4
+        else if (grid[randomRow][randomCol] == 5
                 && grid[randomRow + 1][randomCol] > 0 // any particle besides another lava or fire
-                && grid[randomRow + 1][randomCol] < 4) {
+                && grid[randomRow + 1][randomCol] < 5) {
             // Move lava down 1
             grid[randomRow][randomCol] = 0;
-            grid[randomRow + 1][randomCol] = 4;// Turn to lava
+            grid[randomRow + 1][randomCol] = 5;// Turn to lava
             // Next, ignite surrounding area (add fire)
             // First, out of bounds check right and left before igniting
             if(randomCol == maxCol
                || randomCol == 0) {}
             // Lava check before igniting surrounding area (only ignite metal, sand, and water)
-            else if(grid[randomRow][randomCol+1] < 4){
-                grid[randomRow][randomCol+1] = 5;// Turn to fire
+            else if(grid[randomRow][randomCol+1] < 5){
+                grid[randomRow][randomCol+1] = 6;// Turn to fire
             }
-            else if(grid[randomRow][randomCol-1] < 4){
-                grid[randomRow][randomCol-1] = 5;// Turn to fire
+            else if(grid[randomRow][randomCol-1] < 5){
+                grid[randomRow][randomCol-1] = 6;// Turn to fire
             }
         }
         // Fire random movement: If the particle is fire, move in a random direction that is free, or be extinguished randomly
-        else if (grid[randomRow][randomCol] == 5) {
+        else if (grid[randomRow][randomCol] == 6) {
             // Get random direction (dont use same Random as water in order to use different seed)
             int randomDir = new Random().nextInt(3);
             // 0 puts out fire (happens 1/3 rolls)
@@ -212,55 +242,43 @@ public class Solution {
                     || randomCol == 0) {}
             // Lava check before igniting surrounding area (only ignite metal, sand, and water)
             else if (randomDir == 1
-                     && grid[randomRow][randomCol + 1] < 4){ // flame ignites everything except lava
-                grid[randomRow][randomCol + 1] = 5;
+                     && grid[randomRow][randomCol + 1] < 5){ // flame ignites everything except lava
+                grid[randomRow][randomCol + 1] = 6;
             }
             else if (randomDir == 2
-                     && grid[randomRow][randomCol - 1] < 4) { // flame ignites everything except lava
-                grid[randomRow][randomCol - 1] = 5;
-            }
-        }
-        // Sand anti-stacking: Fall to the side (through an empty or water) instead of making a single vertical column
-        else if (grid[randomRow][randomCol] == 2 // Sand with sand the next 2 below (prevent stack)
-                && grid[randomRow + 1][randomCol] == 2){
-            // Get random direction (dont use same Random as water in order to use different seed)
-            int randomDir = new Random().nextInt(3);
-            // Move right and down if empty or water
-            if (randomCol < maxCol // oob check
-                && randomDir == 1
-                && (grid[randomRow + 1][randomCol + 1] == 0
-                    || grid[randomRow + 1][randomCol + 1] == 3)) {
-                grid[randomRow][randomCol] = 0;
-                grid[randomRow + 1][randomCol + 1] = 2;
-            }
-            // Move left and down if empty or water
-            else if (randomCol > 0 // oob check
-                    && randomDir == 2
-                    && (grid[randomRow + 1][randomCol - 1] == 0
-                    || grid[randomRow + 1][randomCol - 1] == 3)) {
-                grid[randomRow][randomCol] = 0;
-                grid[randomRow + 1][randomCol - 1] = 2;
+                     && grid[randomRow][randomCol - 1] < 5) { // flame ignites everything except lava
+                grid[randomRow][randomCol - 1] = 6;
             }
         }
         // Lava anti-stacking: Fall to the side (through anything) instead of making a single vertical column
-        else if (grid[randomRow][randomCol] == 4 // Sand with sand the next 2 below (prevent stack)
-                && grid[randomRow + 1][randomCol] == 4){
+        else if (grid[randomRow][randomCol] == 5 // Sand with sand the next 2 below (prevent stack)
+                && grid[randomRow + 1][randomCol] == 5){
             // Get random direction (dont use same Random as water in order to use different seed)
             int randomDir = new Random().nextInt(3);
             // Move right and down
             if (randomCol < maxCol // oob check
                  && randomDir == 1
-                 && grid[randomRow + 1][randomCol + 1] < 4) {
+                 && grid[randomRow + 1][randomCol + 1] < 5) {
                 grid[randomRow][randomCol] = 0;
-                grid[randomRow + 1][randomCol + 1] = 4;
+                grid[randomRow + 1][randomCol + 1] = 5;
             }
             // Move left and down
             else if (randomCol > 0 // oob check
                     && randomDir == 2
-                    && grid[randomRow + 1][randomCol - 1] < 4) {
+                    && grid[randomRow + 1][randomCol - 1] < 5) {
                 grid[randomRow][randomCol] = 0;
-                grid[randomRow + 1][randomCol - 1] = 4;
+                grid[randomRow + 1][randomCol - 1] = 5;
             }
+        }
+        // Fire extinguished by water
+        else if (grid[randomRow][randomCol] == 6
+                && randomCol < maxCol // oob check
+                && randomCol > 0 // oob check
+                && (grid[randomRow + 1][randomCol] == 3 // next to water
+                || grid[randomRow][randomCol + 1] == 3
+                || grid[randomRow][randomCol - 1] == 3)){
+            // Erase particle
+            grid[randomRow][randomCol] = 0;
         }
     }
 
@@ -465,8 +483,8 @@ public class Solution {
 }
 
 // Note: Project 6 features added
-// 1) Added new particle: Lava. It's red, falls, and burns through other particles
-// 2) Added new particle: Fire. It's orange and moves randomly very briefly until burning out
-// 3) Added new modeling feature: Fire is ignited when Lava contacts other particles
-// 4) Added new modeling feature: Sand and Lava fall down rather than stacking up like a vertical column
-// 5) TBD
+// 1) Added new particle: Cloud. It's white and drifts right until it hits something or disappears
+// 2) Added new particle: Lava. It's red, falls, and burns through other particles
+// 3) Added new particle: Fire. It's orange and moves randomly very briefly until burning out
+// 4) Added new modeling feature: Fire is ignited when Lava contacts other particles
+// 5) Added new modeling feature: Sand and Lava fall down rather than stacking up like a vertical column
