@@ -79,9 +79,42 @@ public class Solution {
         int randomCol = randomPoint.column;
         int maxCol = display.getNumColumns() - 1;
         int maxRow = display.getNumRows() - 1;
+        // Bottom Row - Sand or Water or Metal next to Lava: Ignite
+        if(randomRow == maxRow
+           && grid[randomRow][randomCol] > 0 // Sand or Water or Metal
+           && grid[randomRow][randomCol] < 4
+           && randomCol < maxCol // oob check
+           && randomCol > 0 // oob check
+           && (grid[randomRow][randomCol + 1] == 4 // next to lava
+               || grid[randomRow][randomCol - 1] == 4)) {
+            // Evaporate particle
+            grid[randomRow][randomCol] = 0;
+            // Next, Ignite particle above
+            grid[randomRow-1][randomCol] = 5;
+        }
+        // Bottom Row - Out of bounds check (freeze particles at the very bottom)
+        else if(randomRow == maxRow){}
+        // Sand or Water or Metal next to Lava: Ignite
+        else if (grid[randomRow][randomCol] > 0 // Sand or Water or Metal
+                && grid[randomRow][randomCol] < 4
+                && randomCol < maxCol // oob check
+                && randomCol > 0 // oob check
+                && (grid[randomRow + 1][randomCol] == 4 // next to lava
+                    || grid[randomRow][randomCol + 1] == 4
+                    || grid[randomRow][randomCol - 1] == 4)){
+            // Evaporate particle
+            grid[randomRow][randomCol] = 0;
+            // Next, Ignite surrounding area
+            // Lava check before igniting surrounding area (only ignite metal, sand, and water)
+            if(grid[randomRow][randomCol+1] < 4){
+                grid[randomRow][randomCol+1] = 5;// Turn to fire
+            }
+            else if(grid[randomRow][randomCol-1] < 4){
+                grid[randomRow][randomCol-1] = 5;// Turn to fire
+            }
+        }
         // Sand down movement: If the particle is sand and below is empty, move it down 1
-        if (grid[randomRow][randomCol] == 2
-                && randomRow < maxRow // out of bounds check
+        else if (grid[randomRow][randomCol] == 2
                 && grid[randomRow + 1][randomCol] == 0) {
             // Update grid
             grid[randomRow][randomCol] = 0;
@@ -89,39 +122,19 @@ public class Solution {
         }
         // Sand down movement in water: If the particle is sand and water is below, swap positions (so sand will sink)
         else if (grid[randomRow][randomCol] == 2
-                && randomRow < maxRow
                 && grid[randomRow + 1][randomCol] == 3) {
             // Update grid
             grid[randomRow][randomCol] = 3;
             grid[randomRow + 1][randomCol] = 2;
-        }
-        // Sand or Water movement through Lava: Ignite
-        else if ((grid[randomRow][randomCol] == 2
-                || grid[randomRow][randomCol] == 3)
-                && randomRow < maxRow
-                && grid[randomRow + 1][randomCol] == 4) {
-            // Evaporate particle
-            grid[randomRow][randomCol] = 0;
-            // Next, Ignite surrounding area
-            // Out of bounds check
-            if(randomCol == maxCol
-                    || randomCol == 0) {}
-            // Lava check before igniting surrounding area (only ignite metal, sand, and water)
-            else if(grid[randomRow][randomCol+1] < 4){
-                grid[randomRow][randomCol+1] = 5;// Turn to fire
-            }
-            else if(grid[randomRow][randomCol-1] < 4){
-                grid[randomRow][randomCol-1] = 5;// Turn to fire
-            }
         }
         // If the particle is water, move in a random direction that is free
         else if (grid[randomRow][randomCol] == 3) {
             // Get random direction (for water)
             int randomDir = random.getRandomDirection();
             // First, out of bounds check in all 3 directions
-            if((randomRow == maxRow && randomDir == 0)
-               || (randomCol == maxCol && randomDir == 1)
-               || (randomCol == 0 && randomDir == 2)) {}
+            if((randomDir == 0 && randomRow == maxRow)
+               || (randomDir == 1 && randomCol == maxCol)
+               || (randomDir == 2 && randomCol == 0)) {}
             // Move in the random dir if that space is open
             else if (randomDir == 0
                      && grid[randomRow + 1][randomCol] == 0) {
@@ -139,7 +152,6 @@ public class Solution {
         }
         // Lava down movement through empty space: Move down
         else if (grid[randomRow][randomCol] == 4
-                && randomRow < maxRow // out of bounds check
                 && grid[randomRow + 1][randomCol] == 0) {
             // Update grid
             grid[randomRow][randomCol] = 0;
@@ -147,7 +159,6 @@ public class Solution {
         }
         // Lava movement through other particle: Move down and ignite surrounding area
         else if (grid[randomRow][randomCol] == 4
-                && randomRow < maxRow  // Out of bounds check
                 && grid[randomRow + 1][randomCol] > 0 // any particle besides another lava or fire
                 && grid[randomRow + 1][randomCol] < 4) {
             // Move lava down 1
@@ -181,18 +192,57 @@ public class Solution {
             else if(randomCol == maxCol
                     || randomCol == 0) {}
             // Lava check before igniting surrounding area (only ignite metal, sand, and water)
-            else if (grid[randomRow][randomCol + 1] < 4) { // flame ignites everything except lava
+            else if (randomDir == 1
+                     && grid[randomRow][randomCol + 1] < 4){ // flame ignites everything except lava
                 grid[randomRow][randomCol + 1] = 5;
             }
-            else if (grid[randomRow][randomCol - 1] < 4) { // flame ignites everything except lava
+            else if (randomDir == 2
+                     && grid[randomRow][randomCol - 1] < 4) { // flame ignites everything except lava
                 grid[randomRow][randomCol - 1] = 5;
             }
         }
-        // AIs
-        // Add condition so that lava does not stack up vertically (no more than 2 high?)
-        // Add condition so that sand does not stack up vertically (no more than 2 high?)
-        // Add condition so that water can permeate sand?
-        // Add sand or metal color variation
+        // Sand anti-stacking: Fall to the side (through an empty or water) instead of making a single vertical column
+        else if (grid[randomRow][randomCol] == 2 // Sand with sand the next 2 below (prevent stack)
+                && grid[randomRow + 1][randomCol] == 2){
+            // Get random direction (dont use same Random as water in order to use different seed)
+            int randomDir = new Random().nextInt(3);
+            // Move right and down if empty or water
+            if (randomCol < maxCol // oob check
+                && randomDir == 1
+                && (grid[randomRow + 1][randomCol + 1] == 0
+                    || grid[randomRow + 1][randomCol + 1] == 3)) {
+                grid[randomRow][randomCol] = 0;
+                grid[randomRow + 1][randomCol + 1] = 2;
+            }
+            // Move left and down if empty or water
+            else if (randomCol > 0 // oob check
+                    && randomDir == 2
+                    && (grid[randomRow + 1][randomCol - 1] == 0
+                    || grid[randomRow + 1][randomCol - 1] == 3)) {
+                grid[randomRow][randomCol] = 0;
+                grid[randomRow + 1][randomCol - 1] = 2;
+            }
+        }
+        // Lava anti-stacking: Fall to the side (through anything) instead of making a single vertical column
+        else if (grid[randomRow][randomCol] == 4 // Sand with sand the next 2 below (prevent stack)
+                && grid[randomRow + 1][randomCol] == 4){
+            // Get random direction (dont use same Random as water in order to use different seed)
+            int randomDir = new Random().nextInt(3);
+            // Move right and down
+            if (randomCol < maxCol // oob check
+                 && randomDir == 1
+                 && grid[randomRow + 1][randomCol + 1] < 4) {
+                grid[randomRow][randomCol] = 0;
+                grid[randomRow + 1][randomCol + 1] = 4;
+            }
+            // Move left and down
+            else if (randomCol > 0 // oob check
+                    && randomDir == 2
+                    && grid[randomRow + 1][randomCol - 1] < 4) {
+                grid[randomRow][randomCol] = 0;
+                grid[randomRow + 1][randomCol - 1] = 4;
+            }
+        }
     }
 
     /********************************************************************/
