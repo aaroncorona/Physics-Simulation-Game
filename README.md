@@ -1,7 +1,7 @@
 # Physics Simulation Game
 
 ## 📜 Overview
-Interactive Simulation that reproduces realistic particle movements andd collisions.
+Interactive Simulation that reproduces realistic particle movements and collisions.
 
 ## Week 6 Updates
 ### New Paricles added 
