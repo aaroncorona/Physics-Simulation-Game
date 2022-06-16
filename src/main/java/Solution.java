@@ -14,7 +14,8 @@ public class Solution {
     public static final int CLOUD = 4;
     public static final int LAVA = 5;
     public static final int FIRE = 6;
-    public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water", "Cloud", "Lava", "Fire"};
+    public static final int NUKE = 7;
+    public static final String[] NAMES = {"Empty", "Metal", "Sand", "Water", "Cloud", "Lava", "Fire", "Nuke"};
 
     // Do not add any more fields as part of Lab 5.
     private int[][] grid;
@@ -30,13 +31,9 @@ public class Solution {
     public Solution(SandDisplayInterface display, RandomGenerator random) {
         this.display = display;
         this.random = random;
-        // Fill color grid and grid tracker to start
+        // Initialize empty grid to start
         grid = new int[display.getNumRows()][display.getNumColumns()];
-        for (int i = 0; i < grid.length; i++) {
-            for (int a = 0; a < grid[i].length; a++) {
-                grid[i][a] = 0;
-            }
-        }
+        igniteGrid();
     }
 
     /**
@@ -52,6 +49,9 @@ public class Solution {
             if(new Random().nextInt(2) == 0){
                 tool=-2;
             }
+        }
+        if(tool==7){
+            igniteGrid();
         }
         // Update the grid for every click event
         grid[row][col] = tool;
@@ -290,6 +290,13 @@ public class Solution {
                 || grid[randomRow][randomCol - 1] == 3)){
             // Erase particle
             grid[randomRow][randomCol] = 0;
+        }
+    }
+    public void igniteGrid(){
+        for (int i = 0; i < grid.length; i++) {
+            for (int a = 0; a < grid[i].length; a++) {
+                grid[i][a] = 6;
+            }
         }
     }
 
