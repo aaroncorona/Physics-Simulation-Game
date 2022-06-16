@@ -7,7 +7,7 @@ Interactive Simulation that reproduces realistic particle movements and collisio
 ### New Paricles added 
 1. ☁️ **Cloud**: It slowly drifts until it hits something or disappears
 2. 🌋 **Lava**: It's falls and burns through other particles
-3. 🔥 **Fire**: It's orange and burns briefly until burning out
+3. 🔥 **Fire**: It burns briefly until burning out
 4. 💣 **Nuke**: Ignites the entire screen with fire
 
 ### New Physics added 
