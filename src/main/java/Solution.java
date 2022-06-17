@@ -34,7 +34,7 @@ public class Solution {
         this.random = random;
         // Initialize empty grid to start
         grid = new int[display.getNumRows()][display.getNumColumns()];
-        igniteGrid();
+        igniteGrid(); // start w the big bang
     }
 
     /**
@@ -107,9 +107,10 @@ public class Solution {
         int maxRow = display.getNumRows() - 1;
         // Bottom Row - Sand or Water or Metal next to Lava: Ignite
         if(randomRow == maxRow
-           && (grid[randomRow][randomCol] == 1 // Metal or Sand or Water
+           && (grid[randomRow][randomCol] == 1 // Metal, Sand, Water or Cloud
                || abs(grid[randomRow][randomCol]) == 2
-               || grid[randomRow][randomCol] == 3)
+               || grid[randomRow][randomCol] == 3
+               || grid[randomRow][randomCol] == 4)
            && randomCol < maxCol // oob check
            && randomCol > 0 // oob check
            && (abs(grid[randomRow][randomCol + 1]) == 5 // next to lava
@@ -130,7 +131,8 @@ public class Solution {
         // Any particle next to Lava: Ignite
         else if ((grid[randomRow][randomCol] == 1 // Metal or Sand or Water
                   || abs(grid[randomRow][randomCol]) == 2
-                   || grid[randomRow][randomCol] == 3)
+                  || grid[randomRow][randomCol] == 3
+                  || grid[randomRow][randomCol] == 4)
                 && randomCol < maxCol // oob check
                 && randomCol > 0 // oob check
                 && (abs(grid[randomRow + 1][randomCol]) == 5 // next to lava
@@ -144,11 +146,13 @@ public class Solution {
             // Lava check before igniting surrounding area (only ignite metal, sand, and water)
             if(grid[randomRow][randomCol+1] == 1 // Metal or Sand or Water
                     || abs(grid[randomRow][randomCol+1]) == 2
-                    || grid[randomRow][randomCol+1] == 3){
+                    || grid[randomRow][randomCol+1] == 3
+                    || grid[randomRow][randomCol+1] == 4){
                 grid[randomRow][randomCol+1] = 6;// Turn to fire
             } else if(grid[randomRow][randomCol-1] == 1 // Metal or Sand or Water
                     || abs(grid[randomRow][randomCol-1]) == 2
-                    || grid[randomRow][randomCol-1] == 3){
+                    || grid[randomRow][randomCol-1] == 3
+                    || grid[randomRow][randomCol-1] == 4){
                 grid[randomRow][randomCol-1] = 6;// Turn to fire
             }
         }
@@ -239,8 +243,9 @@ public class Solution {
         // Lava movement through other particle: Move down and ignite surrounding area
         else if (abs(grid[randomRow][randomCol]) == 5
                  && (grid[randomRow+1][randomCol] == 1 // Metal or Sand or Water
-                     || abs(grid[randomRow+1][randomCol]) == 2
-                      || grid[randomRow+1][randomCol] == 3)){
+                      || abs(grid[randomRow+1][randomCol]) == 2
+                      || grid[randomRow+1][randomCol] == 3
+                      || grid[randomRow+1][randomCol] == 4)){
             // Move lava down 1
             grid[randomRow+1][randomCol] = grid[randomRow][randomCol];// Turn to lava
             grid[randomRow][randomCol] = 0;
@@ -251,7 +256,8 @@ public class Solution {
             // Lava check before igniting surrounding area (only ignite metal, sand, and water)
             else if(grid[randomRow][randomCol+1] == 1 // Metal or Sand or Water
                     || abs(grid[randomRow][randomCol+1]) == 2
-                    || grid[randomRow][randomCol+1] == 3){
+                    || grid[randomRow][randomCol+1] == 3
+                    || grid[randomRow][randomCol+1] == 4){
                 grid[randomRow][randomCol+1] = 6;// Turn to fire
             }
             else if(grid[randomRow][randomCol-1] == 1 // Metal or Sand or Water
