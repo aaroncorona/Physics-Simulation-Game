@@ -5,7 +5,7 @@ https://user-images.githubusercontent.com/31792170/174211101-c4560f28-a825-4cb0-
 ## 📜 Overview
 Interactive Simulation that reproduces realistic particle movements and collisions.
 
-## Week 6 Updates
+## Latest Updates
 ### New Paricles added 
 1. ☁️ **Cloud**: Drifts until it hits something or disappears
 2. 🌋 **Lava**: Falls and melts through every particle in its path
